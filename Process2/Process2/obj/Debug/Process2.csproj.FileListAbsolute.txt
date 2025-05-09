@@ -1,0 +1,11 @@
+C:\Users\phamm\source\repos\ASPNETMVCStudent\Process2\Process2\obj\Debug\Process2.csproj.AssemblyReference.cache
+C:\Users\phamm\source\repos\ASPNETMVCStudent\Process2\Process2\obj\Debug\Process2.LoginForm.resources
+C:\Users\phamm\source\repos\ASPNETMVCStudent\Process2\Process2\obj\Debug\Process2.MainForm.resources
+C:\Users\phamm\source\repos\ASPNETMVCStudent\Process2\Process2\obj\Debug\Process2.Properties.Resources.resources
+C:\Users\phamm\source\repos\ASPNETMVCStudent\Process2\Process2\obj\Debug\Process2.csproj.GenerateResource.cache
+C:\Users\phamm\source\repos\ASPNETMVCStudent\Process2\Process2\obj\Debug\Process2.csproj.CoreCompileInputs.cache
+C:\Users\phamm\source\repos\ASPNETMVCStudent\Process2\Process2\bin\Debug\Process2.exe.config
+C:\Users\phamm\source\repos\ASPNETMVCStudent\Process2\Process2\bin\Debug\Process2.exe
+C:\Users\phamm\source\repos\ASPNETMVCStudent\Process2\Process2\bin\Debug\Process2.pdb
+C:\Users\phamm\source\repos\ASPNETMVCStudent\Process2\Process2\obj\Debug\Process2.exe
+C:\Users\phamm\source\repos\ASPNETMVCStudent\Process2\Process2\obj\Debug\Process2.pdb
