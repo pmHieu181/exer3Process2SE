@@ -1,0 +1,121 @@
+﻿@page
+@model MyRazorAppCore.Pages.Orders.PrintModel
+@{
+    Layout = null; // Không sử dụng layout chung để dễ dàng in
+    ViewData["Title"] = "In Đơn Hàng #" + Model.OrderToPrint?.OrderId;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .print-container { max-width: 800px; margin: auto; }
+        h1, h2, h3 { text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #dee2e6; padding: .75rem; vertical-align: top; }
+        th { background-color: #f8f9fa; }
+        .text-right { text-align: right; }
+        .company-details, .order-summary { margin-bottom: 30px; }
+        .footer-print { margin-top: 50px; text-align: center; font-size: 0.9em; }
+
+        @@media print {
+            body { margin: 0; font-size: 12pt; }
+            .no-print { display: none !important; }
+            .print-container { max-width: 100%; margin: 0; padding:0; }         
+        }
+    </style>
+</head>
+<body>
+    @if (Model.OrderToPrint != null)
+    {
+        <div class="print-container">
+            <div class="company-details text-center mb-4">
+                <h2>TÊN CÔNG TY CỦA BẠN</h2>
+                <p>Địa chỉ công ty | Điện thoại: 0123456789 | Email: contact@company.com</p>
+            </div>
+
+            <h1>HÓA ĐƠN BÁN HÀNG</h1>
+            <div class="order-summary row mt-4 mb-3">
+                <div class="col-6">
+                    <p><strong>Đại lý:</strong> @Model.OrderToPrint.Agent?.Name</p>
+                    <p><strong>Địa chỉ/Liên hệ:</strong> @Model.OrderToPrint.Agent?.ContactInfo</p>
+                </div>
+                <div class="col-6 text-right">
+                    <p><strong>Số HĐ:</strong> @Model.OrderToPrint.OrderId.ToString("D6")</p>
+                    <p><strong>Ngày đặt:</strong> @Model.OrderToPrint.OrderDate.ToString("dd/MM/yyyy HH:mm")</p>
+                </div>
+            </div>
+
+            <h3>Chi Tiết Đơn Hàng</h3>
+            <table class="table table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Sản phẩm</th>
+                        <th scope="col" class="text-right">Số lượng</th>
+                        <th scope="col" class="text-right">Đơn giá</th>
+                        <th scope="col" class="text-right">Thành tiền</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        int count = 1;
+                    }
+                    @foreach (var detail in Model.OrderToPrint.OrderDetails)
+                    {
+                        <tr>
+                            <td>@(count++)</td>
+                            <td>@detail.Product?.Name</td>
+                            <td class="text-right">@detail.Quantity</td>
+                            <td class="text-right">@detail.UnitPrice.ToString("N0") đ</td>
+                            <td class="text-right">@((detail.Quantity * detail.UnitPrice).ToString("N0")) đ</td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="4" class="text-right"><strong>Tổng cộng:</strong></td>
+                        <td class="text-right"><strong>@Model.OrderToPrint.TotalAmount.ToString("N0") đ</strong></td>
+                    </tr>
+                </tfoot>
+            </table>
+            <div class="mt-4 no-print">
+                <a asp-page="/Orders/Edit" asp-route-id="@Model.OrderToPrint.OrderId" class="btn btn-primary">Sửa</a>
+                <a asp-page="/Orders/Print" asp-route-orderId="@Model.OrderToPrint.OrderId" class="btn btn-info" target="_blank">In Lại Hóa Đơn</a>
+                <a asp-page="/Orders/Index" class="btn btn-secondary">Về Danh sách</a>
+            </div>
+
+            <div class="row mt-5">
+                <div class="col-6 text-center">
+                    <strong>Người mua hàng</strong><br />
+                    <em>(Ký, ghi rõ họ tên)</em>
+                </div>
+                <div class="col-6 text-center">
+                    <strong>Người bán hàng</strong><br />
+                    <em>(Ký, ghi rõ họ tên)</em>
+                </div>
+            </div>
+
+            <div class="footer-print">
+                Cảm ơn quý khách đã mua hàng!
+            </div>
+
+            <div class="text-center mt-4 no-print">
+                <button onclick="window.print();" class="btn btn-primary">In Hóa Đơn</button>
+                <a asp-page="./Details" asp-route-id="@Model.OrderToPrint.OrderId" class="btn btn-secondary">Quay lại</a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-warning">Không tìm thấy đơn hàng để in.</div>
+        <div class="text-center mt-4 no-print">
+            <a asp-page="./Index" class="btn btn-secondary">Về Danh sách Đơn hàng</a>
+        </div>
+    }
+</body>
+</html>

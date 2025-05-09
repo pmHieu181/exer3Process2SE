@@ -1,0 +1,174 @@
+﻿@page
+@model MyRazorAppCore.Pages.Orders.CreateModel
+@{
+}
+<h1>@ViewData["Title"]</h1>
+
+<form method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+    <h4>Thông tin Chung</h4>
+    <hr />
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group mb-3">
+                <label asp-for="Order.AgentId" class="control-label">Đại lý</label>
+                <select asp-for="Order.AgentId" class="form-select" asp-items="Model.AgentSL">
+                    <option value="">-- Chọn Đại lý --</option>
+                </select>
+                <span asp-validation-for="Order.AgentId" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group mb-3">
+                <label asp-for="Order.OrderDate" class="control-label">Ngày Đặt</label>
+                <input asp-for="Order.OrderDate" class="form-control" type="datetime-local" />
+                <span asp-validation-for="Order.OrderDate" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+
+    <h4>Chi Tiết Đơn Hàng</h4>
+    @* Display collection-level validation errors for OrderDetailInputs if any *@
+    <div asp-validation-for="OrderDetailInputs" class="text-danger mb-2"></div>
+    <hr />
+    <div id="orderDetailsContainer">
+        @for (int i = 0; i < Model.OrderDetailInputs.Count; i++)
+        {
+            <div class="order-detail-item row align-items-end mb-2">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="OrderDetailInputs[i].ProductId" class="control-label">Sản phẩm</label>
+                        <select asp-for="OrderDetailInputs[i].ProductId" class="form-select product-select" asp-items="Model.ProductSL">
+                            <option value="">-- Chọn Sản phẩm --</option>
+                        </select>
+                        <span asp-validation-for="OrderDetailInputs[i].ProductId" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label asp-for="OrderDetailInputs[i].Quantity" class="control-label">Số lượng</label>
+                        <input asp-for="OrderDetailInputs[i].Quantity" type="number" class="form-control quantity-input" min="1" />
+                        <span asp-validation-for="OrderDetailInputs[i].Quantity" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <button type="button" class="btn btn-danger remove-detail-item @(Model.OrderDetailInputs.Count <= 1 ? "d-none" : "")">Xóa</button>
+                </div>
+            </div>
+        }
+    </div>
+
+    <button type="button" id="addOrderDetailItem" class="btn btn-success mb-3 mt-2">Thêm Sản phẩm</button>
+
+    <div class="form-group mt-4">
+        <input type="submit" value="Tạo Đơn Hàng" class="btn btn-primary" />
+        <a asp-page="./Index" class="btn btn-secondary">Hủy</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function () {
+            // This string will be populated by Razor when the page renders.
+            // It contains the <option> tags for products, excluding the placeholder.
+            var productOptionsHtml = "";
+        @foreach (var product in Model.ProductSL.Where(p => !string.IsNullOrEmpty(p.Value))) // Ensure we only get actual product options
+        {
+            // Using JavaScriptEncoder.Default.Encode for safety, as product text might contain special characters.
+            @:productOptionsHtml += '<option value="@product.Value">@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(product.Text))</option>';
+        }
+
+            // Function to show/hide "Xóa" (Remove) buttons based on the number of items.
+            // If only one item remains, its remove button is hidden.
+            function updateRemoveButtonsVisibility() {
+                var items = $(".order-detail-item");
+                if (items.length <= 1) {
+                    items.find(".remove-detail-item").addClass("d-none");
+                } else {
+                    items.find(".remove-detail-item").removeClass("d-none");
+                }
+            }
+
+            // Event handler for the "Thêm Sản phẩm" (Add Product) button.
+            $("#addOrderDetailItem").click(function () {
+                var container = $("#orderDetailsContainer");
+                // Determine the index for the new item. This is crucial for model binding.
+                var index = container.find(".order-detail-item").length;
+
+                // Construct HTML for the new order detail item.
+                // Using template literals for easier string construction.
+                // Note the `name` attributes are indexed (`OrderDetailInputs[${index}].PropertyName`).
+                // Validation message spans (`data-valmsg-for`) also use these indexed names.
+                var newItemHtml = `
+                    <div class="order-detail-item row align-items-end mb-2">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label">Sản phẩm</label>
+                                <select name="OrderDetailInputs[${index}].ProductId" class="form-select product-select">
+                                    <option value="">-- Chọn Sản phẩm --</option>
+                                    ${productOptionsHtml}
+                                </select>
+                                <span class="text-danger" data-valmsg-for="OrderDetailInputs[${index}].ProductId" data-valmsg-replace="true"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">Số lượng</label>
+                                <input type="number" name="OrderDetailInputs[${index}].Quantity" class="form-control quantity-input" min="1" value="1" />
+                                <span class="text-danger" data-valmsg-for="OrderDetailInputs[${index}].Quantity" data-valmsg-replace="true"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <button type="button" class="btn btn-danger remove-detail-item">Xóa</button>
+                        </div>
+                    </div>`;
+
+                container.append(newItemHtml); // Add the new item to the container.
+                updateRemoveButtonsVisibility(); // Update visibility of remove buttons.
+
+                // ASP.NET Core's unobtrusive validation needs to be re-parsed for newly added elements.
+                var form = $(this).closest("form");
+                form.removeData("validator");
+                form.removeData("unobtrusiveValidation");
+                $.validator.unobtrusive.parse(form);
+            });
+
+            // Event handler for "Xóa" (Remove) buttons within the orderDetailsContainer.
+            // Uses event delegation to handle clicks on dynamically added buttons.
+            $("#orderDetailsContainer").on("click", ".remove-detail-item", function () {
+                $(this).closest(".order-detail-item").remove(); // Remove the parent item.
+
+                // After removing an item, re-index the name attributes of remaining items
+                // to ensure correct model binding and validation message targeting.
+                $("#orderDetailsContainer .order-detail-item").each(function(newIndex) {
+                    var currentItem = $(this);
+
+                    // Update ProductId select and its validation span
+                    var productSelect = currentItem.find("select.product-select");
+                    var oldProductSelectName = productSelect.attr("name");
+                    if (oldProductSelectName) {
+                         productSelect.attr("name", `OrderDetailInputs[${newIndex}].ProductId`);
+                         // Update the 'data-valmsg-for' for the associated validation message span
+                         currentItem.find(`span[data-valmsg-for="${oldProductSelectName.replace('[', '\\[').replace(']', '\\]')}"]`)
+                                    .attr("data-valmsg-for", `OrderDetailInputs[${newIndex}].ProductId`);
+                    }
+
+                    // Update Quantity input and its validation span
+                    var quantityInput = currentItem.find("input.quantity-input");
+                    var oldQuantityInputName = quantityInput.attr("name");
+                    if(oldQuantityInputName){
+                        quantityInput.attr("name", `OrderDetailInputs[${newIndex}].Quantity`);
+                        // Update the 'data-valmsg-for' for the associated validation message span
+                        currentItem.find(`span[data-valmsg-for="${oldQuantityInputName.replace('[', '\\[').replace(']', '\\]')}"]`)
+                                   .attr("data-valmsg-for", `OrderDetailInputs[${newIndex}].Quantity`);
+                    }
+                });
+                updateRemoveButtonsVisibility(); // Update visibility of remove buttons.
+            });
+
+            updateRemoveButtonsVisibility(); // Initial call on page load to set button visibility.
+        });
+    </script>
+}

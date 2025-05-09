@@ -1,0 +1,94 @@
+﻿@page
+@model MyRazorAppCore.Pages.Reports.AgentPurchaseHistoryModel
+@{
+    ViewData["Title"] = "Lịch sử Mua hàng của Đại lý";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<form method="get" class="mb-4 p-3 border rounded bg-light">
+    <div class="row g-3 align-items-end">
+        <div class="col-md-4">
+            <label asp-for="SelectedAgentId" class="form-label">Chọn Đại lý</label>
+            <select asp-for="SelectedAgentId" asp-items="Model.AgentSL" class="form-select">
+                <option value="">-- Tất cả Đại lý --</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label asp-for="StartDate" class="form-label">Từ ngày</label>
+            <input asp-for="StartDate" type="date" class="form-control" />
+        </div>
+        <div class="col-md-3">
+            <label asp-for="EndDate" class="form-label">Đến ngày</label>
+            <input asp-for="EndDate" type="date" class="form-control" />
+        </div>
+        <div class="col-md-1">
+            <button type="submit" class="btn btn-primary w-100">Lọc</button>
+        </div>
+        <div class="col-md-1">
+            <a asp-page="./AgentPurchaseHistory" class="btn btn-secondary w-100">Xóa</a>
+        </div>
+    </div>
+</form>
+
+@if (Model.SelectedAgentId.HasValue)
+{
+    @if (!string.IsNullOrEmpty(Model.SelectedAgentName))
+    {
+        <h2>Kết quả cho Đại lý: @Model.SelectedAgentName</h2>
+    }
+
+    @if (Model.OrdersResult.Any())
+    {
+        @foreach (var order in Model.OrdersResult)
+        {
+            <div class="card mb-3 shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        Đơn hàng #@order.OrderId.ToString("D6") - Ngày: @order.OrderDate.ToString("dd/MM/yyyy HH:mm")
+                        <span class="float-end">Tổng tiền: <strong>@order.TotalAmount.ToString("N0") VNĐ</strong></span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <h6 class="card-title">Chi tiết sản phẩm:</h6>
+                    @if (order.OrderDetails.Any())
+                    {
+                        <table class="table table-sm table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Sản phẩm</th>
+                                    <th class="text-end">Số lượng</th>
+                                    <th class="text-end">Đơn giá</th>
+                                    <th class="text-end">Thành tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var detail in order.OrderDetails)
+                                {
+                                    <tr>
+                                        <td>@(detail.Product?.Name ?? "N/A")</td>
+                                        <td class="text-end">@detail.Quantity.ToString("N0")</td>
+                                        <td class="text-end">@detail.UnitPrice.ToString("N0") VNĐ</td>
+                                        <td class="text-end">@((detail.Quantity * detail.UnitPrice).ToString("N0")) VNĐ</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <p class="text-muted">Đơn hàng này không có chi tiết sản phẩm.</p>
+                    }
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="alert alert-info">Không tìm thấy đơn hàng nào cho đại lý này với bộ lọc hiện tại.</div>
+    }
+}
+else
+{
+    <div class="alert alert-secondary">Vui lòng chọn một đại lý để xem lịch sử mua hàng.</div>
+}
